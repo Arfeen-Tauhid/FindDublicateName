@@ -5,58 +5,68 @@
 </head>
 <body>
     <h2>Duplicate Emails</h2>
+    <button onclick="showDuplicates()">Find Duplicates</button>
     <div id="output"></div>
 
     <script>
+        let jsonData = [];
+
+        // Load JSON data first
         fetch('data.json')
             .then(response => response.json())
             .then(data => {
-                // Find duplicates by 'Name'
-                const seen = new Set();
-                const duplicates = [];
-                const unique = new Set();
-
-                data.forEach(entry => {
-                    const key = entry.name;
-                    if (unique.has(key)) {
-                        duplicates.push(entry);
-                        seen.add(key);
-                    } else {
-                        unique.add(key);
-                    }
-                });
-
-                const container = document.getElementById('output');
-
-                if (duplicates.length === 0) {
-                    container.innerHTML = "<p>No duplicates found!</p>";
-                    return;
-                }
-
-                // Create a table
-                const table = document.createElement('table');
-                table.border = "1";
-
-                const headers = Object.keys(duplicates[0]);
-                const thead = table.insertRow();
-
-                headers.forEach(header => {
-                    const th = document.createElement('th');
-                    th.innerText = header;
-                    thead.appendChild(th);
-                });
-
-                duplicates.forEach(row => {
-                    const tr = table.insertRow();
-                    headers.forEach(header => {
-                        const td = tr.insertCell();
-                        td.innerText = row[header];
-                    });
-                });
-
-                container.appendChild(table);
+                jsonData = data;
             })
             .catch(err => console.error("Error loading JSON:", err));
+
+        function showDuplicates() {
+            const seen = new Set();
+            const duplicates = [];
+            const unique = new Set();
+
+            jsonData.forEach(entry => {
+                const key = entry.name;
+                if (unique.has(key)) {
+                    if (!seen.has(key)) {
+                        duplicates.push(entry);
+                        seen.add(key);
+                    }
+                } else {
+                    unique.add(key);
+                }
+            });
+
+            const container = document.getElementById('output');
+            container.innerHTML = ""; // Clear previous results
+
+            if (duplicates.length === 0) {
+                container.innerHTML = "<p>No duplicates found!</p>";
+                return;
+            }
+
+            // Create a table
+            const table = document.createElement('table');
+            table.border = "1";
+
+            const headers = Object.keys(duplicates[0]);
+            const thead = table.insertRow();
+
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.innerText = header;
+                thead.appendChild(th);
+            });
+
+            duplicates.forEach(row => {
+                const tr = table.insertRow();
+                headers.forEach(header => {
+                    const td = tr.insertCell();
+                    td.innerText = row[header];
+                });
+            });
+
+            container.appendChild(table);
+        }
     </script>
 </body>
 </html>
